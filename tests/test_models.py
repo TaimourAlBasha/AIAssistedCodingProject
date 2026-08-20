@@ -32,6 +32,14 @@ class TaskCreateTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             TaskCreate(title="Valid", unexpected="value")
 
+    def test_more_than_five_tags_are_rejected(self) -> None:
+        with self.assertRaises(ValidationError):
+            TaskCreate(title="Too many tags", tags=[f"tag-{index}" for index in range(6)])
+
+    def test_tags_over_thirty_characters_are_rejected(self) -> None:
+        with self.assertRaises(ValidationError):
+            TaskCreate(title="Long tag", tags=["x" * 31])
+
 
 class TaskUpdateTests(unittest.TestCase):
     def test_all_fields_are_optional(self) -> None:

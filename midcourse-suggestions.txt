@@ -1,0 +1,201 @@
+TASK TRACKER MIDCOURSE PROJECT - SUGGESTIONS
+==================================================
+
+CURRENT PROJECT FIT
+-------------------
+The requested due-date and tag features fit the existing architecture:
+
+- Backend: FastAPI and Pydantic
+- Storage: in-memory dictionary of TaskResponse objects
+- Frontend: one HTML file with embedded CSS and vanilla JavaScript
+- Tests: unittest plus pytest/FastAPI TestClient
+
+The implementation should extend the current models, storage functions, list
+route, modal form, cards, and fetch flow without adding a database, framework,
+or migration system.
+
+
+DECISIONS FOR USER REVIEW
+-------------------------
+1. Due-date timezone
+
+Suggested rule: overdue filtering uses the backend server's local calendar
+date. The browser uses its local calendar date for the visual indicator.
+
+Review concern: if the browser and server are in different time zones, they
+could disagree briefly near midnight. A single agreed timezone would remove
+that edge case.
+
+User correction: [PLACEHOLDER - USER TO CONFIRM OR CHANGE]
+
+2. Tag limits and matching
+
+Suggested rule:
+
+- Maximum 5 tags per task
+- Maximum 30 characters per tag
+- Trim surrounding whitespace
+- Reject blank values after trimming
+- Deduplicate case-insensitively
+- Preserve the spelling and order of the first occurrence
+- Filter case-insensitively
+
+Example: ["API", " api ", "Frontend"] becomes ["API", "Frontend"].
+
+User correction: [PLACEHOLDER - USER TO CONFIRM OR CHANGE]
+
+
+FEATURE 1: DUE-DATE USER STORIES
+--------------------------------
+1. Create with a due date
+
+As a user, I can assign an optional due date when creating a task.
+
+Acceptance criteria:
+- A valid YYYY-MM-DD value is accepted and returned unchanged.
+- Omitting the field results in null.
+- An invalid calendar date receives HTTP 422.
+
+2. Edit or clear a due date
+
+As a user, I can replace or remove a task's due date.
+
+Acceptance criteria:
+- PATCH with a valid date replaces the current date.
+- PATCH with null clears the date.
+- PATCH without due_date preserves the current date.
+- Other fields remain unchanged.
+
+3. Recognize overdue tasks
+
+As a user, I can clearly identify overdue incomplete tasks.
+
+Acceptance criteria:
+- A task is overdue only when its due date is earlier than today.
+- A task due today is not overdue.
+- A Done task is never overdue.
+- The card uses accessible text as well as visual styling.
+
+4. Filter overdue work
+
+As a user, I can show only overdue tasks.
+
+Acceptance criteria:
+- A compact overdue control filters the board.
+- All three Kanban columns remain visible.
+- Columns with no matches show a clear empty state.
+
+
+FEATURE 2: TAG USER STORIES
+---------------------------
+1. Create with tags
+
+As a user, I can enter a simple comma-separated tag list.
+
+Acceptance criteria:
+- Tags are trimmed and returned as a string list.
+- Blank tags receive HTTP 422.
+- Valid tags appear as chips on the task card.
+
+2. Handle duplicates predictably
+
+As a user, I do not get duplicate versions of the same tag.
+
+Acceptance criteria:
+- Duplicate comparison is case-insensitive.
+- First spelling and order are retained.
+- The same behavior applies to POST and PATCH.
+
+3. Edit or clear tags
+
+As a user, I can replace or remove all tags.
+
+Acceptance criteria:
+- PATCH with a list replaces the current tags.
+- PATCH with [] clears the tags.
+- PATCH without tags preserves the current list.
+- Unrelated fields remain unchanged.
+
+4. Filter by tag
+
+As a user, I can filter tasks by tag alongside the overdue filter.
+
+Acceptance criteria:
+- Tag matching is case-insensitive.
+- Tag and overdue filters combine with AND behavior.
+- Clearing filters restores all tasks.
+- No matches produce clear empty states.
+
+
+MINI-ADR
+--------
+Due-date representation:
+- Use Python date | None in Pydantic models.
+- Serialize as an ISO calendar date: YYYY-MM-DD.
+- Use null to clear the field.
+
+Tag representation:
+- Use list[str] with an empty-list default.
+- Normalize through a shared Pydantic validator.
+- Use [] to clear all tags.
+
+Overdue computation:
+- Compute rather than store overdue state.
+- A task is overdue when due_date exists, due_date < today, and status != Done.
+- Computing avoids stale state after a status/date change or a new calendar day.
+
+Filtering API:
+- GET /tasks?overdue=true
+- GET /tasks?tag=backend
+- GET /tasks?overdue=true&tag=backend
+- Combined filters use AND behavior.
+
+Rejected complexity:
+- Arbitrary date strings because they weaken validation
+- Persisted is_overdue flags because they become stale
+- Tag IDs, colors, and management screens
+- Database and migrations
+- Frontend frameworks or complex autocomplete controls
+
+
+IMPLEMENTATION CHECKPOINTS
+--------------------------
+1. Write approved stories and ADR under docs/midcourse/.
+2. Add due_date to create, update, and response models.
+3. Preserve, update, and clear due_date through storage.
+4. Add and test overdue filtering.
+5. Integrate due date into the modal, cards, and filter controls.
+6. Run the due-date Break Test and restore the correct implementation.
+7. Add validated and normalized tags to models and storage.
+8. Add and test case-insensitive tag filtering.
+9. Integrate tag entry, chips, and filtering into the frontend.
+10. Test combined overdue and tag filtering.
+11. Run the tag Break Test and restore the correct implementation.
+12. Run the full behavior contract and complete test suite.
+13. Make only a small justified refactor if duplication warrants it.
+14. Complete documentation and update the stale README.
+15. Inspect the final Git diff for unrelated or generated files.
+
+
+BASELINE RESULTS
+----------------
+Command: .\venv\Scripts\python.exe -m pytest -q
+Result: 16 passed, 2 deprecation warnings in 0.36s
+
+Command: .\venv\Scripts\python.exe -m unittest discover -s tests -v
+Result: 15 tests passed
+
+Command: .\venv\Scripts\python.exe -m compileall -q app tests scripts add_tasks.py
+Result: PASS
+
+Live checks:
+- GET /health returned status=ok
+- GET / returned HTTP 200 with the expected page title
+
+No frontend lint, build, or automated browser test command currently exists.
+
+
+CURRENT GIT STATE AT PLANNING PAUSE
+-----------------------------------
+Branch: mid-course-project
+Application source changes for the two features: not started

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from typing import Optional
 from uuid import uuid4
 
@@ -23,6 +23,8 @@ def add_task(payload: TaskCreate) -> TaskResponse:
         status=payload.status,
         priority=payload.priority,
         assignee=payload.assignee,
+        due_date=payload.due_date,
+        tags=payload.tags,
         created_at=now,
         updated_at=now,
     )
@@ -30,7 +32,21 @@ def add_task(payload: TaskCreate) -> TaskResponse:
     return task
 
 
-def get_all_tasks(status=None, priority=None) -> list[TaskResponse]:
+def is_task_overdue(task: TaskResponse, today: Optional[date] = None) -> bool:
+    comparison_date = today or date.today()
+    return (
+        task.due_date is not None
+        and task.due_date < comparison_date
+        and task.status != TaskStatus.DONE
+    )
+
+
+def get_all_tasks(
+    status=None,
+    priority=None,
+    overdue: Optional[bool] = None,
+    tag: Optional[str] = None,
+) -> list[TaskResponse]:
     tasks = list(_tasks.values())
 
     if status is not None:
@@ -40,6 +56,17 @@ def get_all_tasks(status=None, priority=None) -> list[TaskResponse]:
     if priority is not None:
         priority = TaskPriority(priority)
         tasks = [task for task in tasks if task.priority == priority]
+
+    if overdue is not None:
+        tasks = [task for task in tasks if is_task_overdue(task) is overdue]
+
+    if tag is not None:
+        comparison_tag = tag.strip().casefold()
+        tasks = [
+            task
+            for task in tasks
+            if any(task_tag.casefold() == comparison_tag for task_tag in task.tags)
+        ]
 
     return tasks
 

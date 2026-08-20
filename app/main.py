@@ -59,8 +59,17 @@ def create_task(payload: TaskCreate) -> TaskResponse:
     response_model=list[TaskResponse],
     tags=["tasks"],
 )
-def list_tasks() -> list[TaskResponse]:
-    return storage.get_all_tasks()
+def list_tasks(
+    overdue: bool | None = None,
+    tag: str | None = None,
+) -> list[TaskResponse]:
+    if tag is not None and not tag.strip():
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Tag filter must not be blank",
+        )
+
+    return storage.get_all_tasks(overdue=overdue, tag=tag)
 
 
 @app.get(

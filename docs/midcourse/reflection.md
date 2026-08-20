@@ -1,0 +1,13 @@
+# Midcourse Reflection Draft
+
+This project used Codex as an AI-assisted development partner for repository inspection, test design, incremental implementation, terminal-based verification, and documentation. The work began with a read-only architecture review instead of immediate code generation. That review identified the FastAPI/Pydantic boundary, in-memory storage, vanilla-JavaScript frontend, mixed unittest/pytest suite, stale README, and initially missing Git repository. After Git was initialized externally, Codex verified a clean baseline and created the requested feature branch.
+
+AI helped most by keeping the two features aligned across layers. The same due-date contract was applied to Pydantic validation, PATCH preservation and clearing, overdue filtering, frontend form data, and card presentation. Likewise, the tag normalization rule was shared by create and update models and exercised through API tests. Focused tests made the behavior concrete before the final integration run. The controlled Break Tests were particularly valuable: reversing the completed-task overdue condition and removing case-insensitive tag comparison each produced the expected focused failure, demonstrating that the tests detect meaningful defects rather than merely execute code.
+
+AI also slowed the work in practical ways. File patches in the OneDrive-synchronized workspace sometimes took more than a minute, requiring careful waits to avoid overlapping writes. An attempted JavaScript syntax check revealed that Node.js was unavailable, so frontend verification had to be divided honestly between static checks and a manual browser checklist. Existing FastAPI/Starlette dependencies emitted deprecation warnings that were documented but deliberately left outside feature scope.
+
+The user's review confirmed the proposed timezone rule and tag limits before implementation. Later, manual browser review changed the result: the user requested a popup for invalid status transitions. The original drag-and-drop implementation used a native browser `alert()`. Based on that feedback, it was replaced with a styled, accessible in-app toast using `role="alert"` and `aria-live="assertive"`, while the modal retained its inline validation behavior.
+
+**[USER PLACEHOLDER: Add your own judgment about what you learned, what you would do differently, and whether AI assistance improved your confidence.]**
+
+The main lesson is that responsible AI assistance depends on explicit contracts, incremental tests, visible assumptions, reversible experiments, and honest separation between automated evidence and checks still requiring a person.

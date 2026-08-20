@@ -79,6 +79,47 @@
       margin-left: 10px;
     }
 
+    .board-filters {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 30px rgba(30, 41, 59, 0.06);
+      backdrop-filter: blur(14px);
+    }
+
+    .filter-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-control input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: var(--accent);
+    }
+
+    .filter-control input[type="search"] {
+      width: min(220px, 34vw);
+      border: 1px solid rgba(148, 163, 184, 0.38);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--text);
+      font: inherit;
+      font-weight: 400;
+    }
+
     .kanban-column {
       background: #ffffff;
       border: 1px solid var(--border);
@@ -226,6 +267,30 @@
     }
 
     .modal-overlay[hidden] {
+      display: none;
+    }
+
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 20;
+      width: min(420px, calc(100vw - 32px));
+      padding: 16px 18px;
+      border: 1px solid rgba(196, 61, 86, 0.3);
+      border-radius: 14px;
+      background: #fff1f3;
+      color: var(--danger);
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+      box-shadow: 0 18px 50px rgba(60, 25, 36, 0.2);
+      transform: translate(-50%, -50%);
+      animation: toast-in 180ms ease-out;
+    }
+
+    .toast[hidden] {
       display: none;
     }
 
@@ -556,6 +621,31 @@
     .task-card[data-priority="Medium"]::before { background: #f4ad4d; }
     .task-card[data-priority="Low"]::before { background: #35b893; }
 
+    .task-card.overdue-task {
+      border-color: rgba(196, 61, 86, 0.34);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(255, 242, 244, 0.94));
+    }
+
+    .task-badge.due-date {
+      background: #edf1f7;
+    }
+
+    .task-badge.overdue {
+      background: #ffe8ec;
+      color: var(--danger);
+    }
+
+    .task-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .task-badge.tag {
+      background: #eeeaff;
+      color: #5a4bd8;
+    }
+
     .task-card:hover {
       z-index: 1;
       border-color: rgba(109, 93, 252, 0.28);
@@ -687,6 +777,11 @@
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
+    @keyframes toast-in {
+      from { opacity: 0; transform: translate(-50%, calc(-50% + 10px)) scale(0.98); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
     @media (max-width: 760px) {
       .page-shell { padding: 18px 14px 36px; }
       header { padding: 30px 24px; }
@@ -722,6 +817,19 @@
     </header>
 
     <div id="board-status" class="board-status" role="status" aria-live="polite"></div>
+
+    <form id="filter-form" class="board-filters" aria-label="Task filters">
+      <label class="filter-control" for="overdue-filter">
+        <input id="overdue-filter" type="checkbox" />
+        Show overdue only
+      </label>
+      <label class="filter-control" for="tag-filter">
+        Tag
+        <input id="tag-filter" type="search" maxlength="30" placeholder="e.g. backend" />
+      </label>
+      <button class="edit-button" type="submit">Apply filters</button>
+      <button id="clear-filters" class="edit-button" type="button">Clear</button>
+    </form>
 
     <main class="board" data-state="loading" aria-busy="true">
       <section class="kanban-column" data-status="ToDo">
@@ -795,6 +903,16 @@
           <input id="task-assignee" name="assignee" type="text" />
         </label>
 
+        <label class="form-field" for="task-due-date">
+          Due date (optional)
+          <input id="task-due-date" name="dueDate" type="date" />
+        </label>
+
+        <label class="form-field" for="task-tags">
+          Tags (optional, comma-separated)
+          <input id="task-tags" name="tags" type="text" placeholder="backend, urgent" />
+        </label>
+
         <p id="form-error" class="form-error" role="alert" hidden></p>
 
         <div class="modal-actions">
@@ -804,6 +922,8 @@
       </form>
     </section>
   </div>
+
+  <div id="transition-toast" class="toast" role="alert" aria-live="assertive" hidden></div>
 
   <script>
       const apiBase = window.location.protocol === 'file:'
@@ -821,10 +941,25 @@
       const statusInput = document.querySelector('#task-status');
       const priorityInput = document.querySelector('#task-priority');
       const assigneeInput = document.querySelector('#task-assignee');
+      const dueDateInput = document.querySelector('#task-due-date');
+      const tagsInput = document.querySelector('#task-tags');
+      const overdueFilter = document.querySelector('#overdue-filter');
+      const tagFilter = document.querySelector('#tag-filter');
+      const transitionToast = document.querySelector('#transition-toast');
       const titleError = document.querySelector('#title-error');
       const formError = document.querySelector('#form-error');
       const modalSubmit = document.querySelector('#modal-submit');
       let modalTrigger = null;
+      let toastTimer = null;
+
+      function showTransitionToast(message) {
+        window.clearTimeout(toastTimer);
+        transitionToast.textContent = message;
+        transitionToast.hidden = false;
+        toastTimer = window.setTimeout(() => {
+          transitionToast.hidden = true;
+        }, 5000);
+      }
 
       function attachDragHandlers(card) {
         card.draggable = true;
@@ -907,6 +1042,8 @@
         statusInput.value = task?.status ?? 'ToDo';
         priorityInput.value = task?.priority ?? 'Medium';
         assigneeInput.value = task?.assignee ?? '';
+        dueDateInput.value = task?.due_date ?? '';
+        tagsInput.value = Array.isArray(task?.tags) ? task.tags.join(', ') : '';
         modalTitle.textContent = task ? 'Edit Task' : 'New Task';
         modalSubmit.textContent = task ? 'Save Changes' : 'Create Task';
 
@@ -948,6 +1085,8 @@
             status: statusInput.value,
             priority: priorityInput.value,
             assignee: assigneeInput.value.trim() || null,
+            due_date: dueDateInput.value || null,
+            tags: parseTags(tagsInput.value),
           };
 
           if (isEdit) {
@@ -1000,6 +1139,8 @@
         card.className = 'task-card';
         card.dataset.taskId = String(task.id ?? '');
         card.dataset.priority = String(task.priority ?? '');
+        const overdue = isTaskOverdue(task);
+        card.classList.toggle('overdue-task', overdue);
 
         const header = document.createElement('div');
         header.className = 'task-card-header';
@@ -1036,9 +1177,59 @@
 
         meta.append(priorityBadge, assignee);
 
+        if (task.due_date) {
+          const dueDate = document.createElement('span');
+          dueDate.className = `task-badge due-date${overdue ? ' overdue' : ''}`;
+          dueDate.textContent = `${overdue ? 'Overdue · ' : ''}Due ${formatDate(task.due_date)}`;
+          meta.appendChild(dueDate);
+        }
+
+        const tags = document.createElement('div');
+        tags.className = 'task-tags';
+        (task.tags ?? []).forEach((tag) => {
+          const chip = document.createElement('span');
+          chip.className = 'task-badge tag';
+          chip.textContent = tag;
+          tags.appendChild(chip);
+        });
+
         card.append(header, description, meta);
+        if (tags.childElementCount) card.appendChild(tags);
         attachDragHandlers(card);
         return card;
+      }
+
+      function parseTags(value) {
+        if (!value.trim()) return [];
+        return value.split(',').map((tag) => tag.trim());
+      }
+
+      function hasActiveFilters() {
+        return overdueFilter.checked || Boolean(tagFilter.value.trim());
+      }
+
+      function localDateString() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+
+      function isTaskOverdue(task) {
+        return Boolean(
+          task.due_date
+          && task.due_date < localDateString()
+          && task.status !== 'Done'
+        );
+      }
+
+      function formatDate(value) {
+        return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
       }
 
       function sortTasks(list) {
@@ -1078,7 +1269,9 @@
           if (tasksForStatus.length === 0) {
             const empty = document.createElement('p');
             empty.className = 'task-description';
-            empty.textContent = 'No tasks yet';
+            empty.textContent = hasActiveFilters()
+              ? 'No tasks match these filters'
+              : 'No tasks yet';
             content.appendChild(empty);
             if (countEl) countEl.textContent = '0';
             return;
@@ -1152,11 +1345,13 @@
               if (resp.status !== 200) {
                 const payload = await resp.json().catch(() => null);
                 revertTaskStatus(taskId, previousStatus);
-                alert(getUpdateErrorMessage(payload, resp.status));
+                showTransitionToast(getUpdateErrorMessage(payload, resp.status));
+              } else if (hasActiveFilters()) {
+                await fetchTasks();
               }
             } catch (err) {
               revertTaskStatus(taskId, previousStatus);
-              alert('Network error updating task.');
+              showTransitionToast('Network error updating task.');
             }
           });
         });
@@ -1166,7 +1361,12 @@
         setBoardState('loading');
 
         try {
-          const res = await fetch(`${apiBase}/tasks`);
+          const query = new URLSearchParams();
+          if (overdueFilter.checked) query.set('overdue', 'true');
+          if (tagFilter.value.trim()) query.set('tag', tagFilter.value.trim());
+          const queryString = query.toString();
+          const requestUrl = `${apiBase}/tasks${queryString ? `?${queryString}` : ''}`;
+          const res = await fetch(requestUrl);
           if (!res.ok) throw new Error(`Failed to load tasks (${res.status})`);
 
           const data = await res.json();
@@ -1184,6 +1384,16 @@
 
       setupDropZones();
       setupTaskModal();
+      overdueFilter.addEventListener('change', fetchTasks);
+      document.querySelector('#filter-form').addEventListener('submit', (event) => {
+        event.preventDefault();
+        fetchTasks();
+      });
+      document.querySelector('#clear-filters').addEventListener('click', () => {
+        overdueFilter.checked = false;
+        tagFilter.value = '';
+        fetchTasks();
+      });
       setBoardState('loading');
 
       window.addEventListener('DOMContentLoaded', fetchTasks);
