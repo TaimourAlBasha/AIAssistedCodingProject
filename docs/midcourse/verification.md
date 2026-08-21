@@ -117,17 +117,34 @@ There is no frontend test, lint, or build configuration. Node.js is not installe
 
 After manual-review feedback, native drag-and-drop alerts were replaced with an accessible in-app transition toast. Static checks confirmed the toast element and display function are present and no `alert()` call remains. The full suite still passed with 27 tests; visual confirmation of the new toast remains manual.
 
-## Manual checks still required
+## Manual browser verification
 
-- Create a task with a due date and tags in the browser.
-- Edit the date and tags, then clear the due date.
-- Confirm overdue styling appears for past incomplete tasks only.
-- Confirm a completed past-due task is not styled or filtered as overdue.
-- Filter by overdue, tag, and both together.
-- Confirm no-match filters retain all columns and clear empty states.
-- Recheck create, edit, and drag/status transitions.
-- Trigger an invalid drag transition and confirm the new popup is readable and disappears after five seconds.
-- Verify DELETE through the API if desired; the frontend has no delete control.
-- Inspect the browser console and Network panel for errors.
+Date recorded: 2026-08-21
 
-No browser behavior, console result, screenshot, or manual observation is claimed as verified here.
+Browser: Not recorded
+
+Application URL: `http://127.0.0.1:8000/`
+
+The following results were manually verified and reported by the user; they are not automated-test claims:
+
+| Check | Result |
+|---|---|
+| Create a task with a due date and tags | PASS |
+| Edit the due date and tags | PASS |
+| Clear an optional due date | PASS |
+| Show overdue styling only for past incomplete tasks | PASS |
+| Exclude completed past-due tasks from overdue styling and filtering | PASS |
+| Filter by overdue status | PASS |
+| Filter by tag | PASS |
+| Combine overdue and tag filters | PASS |
+| Preserve all Kanban columns and clear empty states when no tasks match | PASS |
+| Preserve existing create and edit behavior | PASS |
+| Move tasks using drag-and-drop | PASS |
+| Show the centered popup for an invalid transition | PASS |
+| Hide the transition popup after five seconds | PASS |
+| Browser Console contains no observed errors | PASS |
+| Network panel contains no observed failed requests | PASS |
+
+Overall manual browser result: **PASS**.
+
+The backend DELETE route was verified through automated and live API checks. The frontend does not provide a delete control, which is existing behavior rather than a regression from these features.

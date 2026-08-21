@@ -66,15 +66,54 @@ Response summary: The approval was interpreted using the immediately preceding r
 
 Decision: The original approval was accepted in context; the stronger wording is retained as a learning example.
 
-## Additional prompt placeholders
+## Additional actual prompts
 
-- User-authored due-date prompt added later: **[PLACEHOLDER]**
-- User-authored tag prompt added later: **[PLACEHOLDER]**
+### P1 — Report the new-field validation failure
 
-## Manual-review follow-up
+Features: Due dates and tags
+
+Actual prompt: “Extra inputs are not permitted; Extra inputs are not permitted. I got this message when I wanted to add a task.”
+
+Response summary: Inspected the live API schemas and found that port 8000 was still running the older backend, which did not recognize `due_date` or `tags`. The stale process was replaced with the updated backend, and a live task creation request using both fields succeeded.
+
+Decision: Accepted. This was a runtime-process problem rather than an application-code defect, so the fix was to restart the correct backend without changing the feature contract.
+
+### P2 — Test the backend changes
+
+Features: Due dates and tags
+
+Actual prompt: “Great, now let’s test the back end of the changes.”
+
+Response summary: Ran nine focused due-date and tag tests, the full 27-test suite, and live HTTP checks for creation, normalization, invalid input, overdue filtering, completed-task exclusion, PATCH preservation, clearing, and combined filters. Temporary verification tasks were deleted afterward.
+
+Decision: Accepted. The tests passed, and no production-code changes were required.
+
+### P3 — Explain tag behavior
+
+Feature: Tags
+
+Actual prompt: “Explain what the tags do.”
+
+Response summary: Explained that tags categorize tasks without affecting their status or priority. The response also described comma-separated input, tag chips, trimming, case-insensitive deduplication, limits, and tag filtering.
+
+Decision: Accepted as a user-facing explanation. No implementation change was requested.
+
+### P4 — Improve invalid-transition feedback
+
+Feature: Existing task workflow
 
 Actual prompt: “I think we can add a pop up message in case of invalid transition.”
 
-Response summary: Replaced native drag-and-drop `alert()` calls with a styled, accessible in-app toast that displays the backend business-rule detail and network failures.
+Response summary: Replaced the native browser `alert()` used after rejected drag-and-drop transitions with an accessible in-app toast showing the backend business-rule message.
 
-Decision: The user's review changed the frontend behavior. Static checks confirmed the toast element and function are present and no native `alert()` call remains; the full backend suite still passed.
+Decision: Edited after review. The first toast appeared in the bottom-right corner, but the user requested that it be centered.
+
+### P5 — Center the transition popup
+
+Feature: Existing task workflow
+
+Actual prompt: “Can we make a pop up in the center of the screen?”
+
+Response summary: Repositioned the transition toast in the center of the viewport and added a dedicated animation that preserves its centered transform.
+
+Decision: Accepted. The full 27-test suite continued to pass.

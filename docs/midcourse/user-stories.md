@@ -47,7 +47,7 @@ Acceptance criteria:
 AI assumption review:
 
 - Confirmed by the user on 2026-08-19: backend overdue filtering uses the server's local calendar date; browser styling uses the browser's local calendar date.
-- AI assumption corrected by the user: **[PLACEHOLDER — approval was provided, but no correction was made; add a real correction only if one occurs.]**
+- Review outcome recorded on 2026-08-21: the user considered the assumption appropriate and accepted it without correction. No correction is claimed.
 
 ## Feature 2: Tags and tag filtering
 
@@ -97,4 +97,4 @@ Acceptance criteria:
 AI assumption review:
 
 - Confirmed by the user on 2026-08-19: maximum 5 tags, maximum 30 characters each, case-insensitive deduplication/filtering, and preservation of the first spelling.
-- AI assumption corrected by the user: **[PLACEHOLDER — approval was provided, but no correction was made; add a real correction only if one occurs.]**
+- Review outcome recorded on 2026-08-21: the user considered the assumption appropriate and accepted it without correction. No correction is claimed.

@@ -1,4 +1,4 @@
-# Midcourse Reflection Draft
+# Midcourse Reflection
 
 This project used Codex as an AI-assisted development partner for repository inspection, test design, incremental implementation, terminal-based verification, and documentation. The work began with a read-only architecture review instead of immediate code generation. That review identified the FastAPI/Pydantic boundary, in-memory storage, vanilla-JavaScript frontend, mixed unittest/pytest suite, stale README, and initially missing Git repository. After Git was initialized externally, Codex verified a clean baseline and created the requested feature branch.
 
@@ -8,6 +8,6 @@ AI also slowed the work in practical ways. File patches in the OneDrive-synchron
 
 The user's review confirmed the proposed timezone rule and tag limits before implementation. Later, manual browser review changed the result: the user requested a popup for invalid status transitions. The original drag-and-drop implementation used a native browser `alert()`. Based on that feedback, it was replaced with a styled, accessible in-app toast using `role="alert"` and `aria-live="assertive"`, while the modal retained its inline validation behavior.
 
-**[USER PLACEHOLDER: Add your own judgment about what you learned, what you would do differently, and whether AI assistance improved your confidence.]**
+I learned how to use AI in coding and how to benefit from it in a more professional and responsible way. Throughout the project, I became better at communicating what I needed, asking how unfamiliar parts worked, and requesting focused revisions when the first result was not quite right. Sometimes I even used AI to help me formulate a clearer request for the coding agent. If I repeated the project, I would define my requirements and acceptance criteria earlier, use more precise prompts from the beginning, and document important decisions as they happen. AI improved my confidence because I now know how to break a coding problem into smaller questions, review the suggested solution, test it, and keep refining it. I do not see AI as a replacement for understanding the code, but as a practical partner that helps me learn faster and approach coding tasks that previously felt difficult or out of reach.
 
 The main lesson is that responsible AI assistance depends on explicit contracts, incremental tests, visible assumptions, reversible experiments, and honest separation between automated evidence and checks still requiring a person.
