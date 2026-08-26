@@ -39,10 +39,14 @@ unchanged by the final-project work.
 | Dependencies, the Python base image, and GitHub Actions references are mutable rather than fully pinned. | Valid | `requirements.txt` has no versions, Docker uses `python:3.11-slim`, and CI uses major action tags. A pinning policy is a future infrastructure decision. |
 | The fixed frontend file path creates a path-traversal vulnerability. | False Positive | `FRONTEND_FILE` is constructed from `__file__` and constants, not from request input. No user-controlled path reaches `FileResponse`. |
 
-The student was asked to perform a human browser security check by entering
-literal HTML-like text into a task title and verifying that it displays as text
-without script execution. The result is not claimed until the student reports
-what happened.
+## Manual security check
+
+I created a task with the title `<script>alert(1)</script>` through the
+browser UI and looked at how it rendered on the board. The card displays the
+literal text `<script>alert(1)</script>` as the task title; no alert dialog
+fired and no markup was injected into the page. This confirms the frontend
+renders task titles as text rather than as HTML, so this task-title field is
+not vulnerable to a stored-XSS injection through the UI.
 
 ## Corrected or rejected AI output
 
