@@ -25,9 +25,13 @@ Automated HTTP evidence:
 | `GET http://127.0.0.1:8000/health` | HTTP 200 with `status` equal to `ok` and a UTC timestamp |
 | `GET http://127.0.0.1:8000/` | HTTP 200, `text/html`, and Task Tracker content |
 
-The browser board and create/edit flow require a human observation. That result
-is recorded only after the student confirms it; the HTTP checks above do not
-stand in for a visual browser check.
+Frontend check (manual, by the student, 2026-08-26): opened
+`http://127.0.0.1:8000/` in a browser and exercised the board directly rather
+than relying on the HTTP checks above. Verified: creating tasks; drag-and-drop
+movement between status columns; setting tags, due date, assignee, and
+priority; the overdue filter; the tag/status filters; valid status
+transitions; and that invalid transitions are rejected with visible feedback
+in the UI. The Kanban board and create/edit flow work as documented.
 
 ## Backend tests
 
@@ -69,8 +73,10 @@ uses Python 3.11, installs `requirements.txt`, and runs `pytest -v`.
 
 The red run changed only one test expectation and was reversed in the next
 commit. The workflow has no `continue-on-error`, `|| true`, `--exit-zero`, test
-output pipe, deployment step, or elevated write permission. The final branch
-run is linked after the branch is pushed.
+output pipe, deployment step, or elevated write permission.
+
+- Final `final-project` branch run (commit `044b639`): Success, 17s —
+  <https://github.com/TaimourAlBasha/AIAssistedCodingProject/actions/runs/33006548631>
 
 ## Docker evidence
 
@@ -133,6 +139,5 @@ Performed on 2026-08-26 after the diff above was complete:
   `docs/ai-playbook.md`, `tests/test_tasks.py`, and the two new files in
   `docs/`. `app/` and `frontend/` are unchanged.
 
-Branch push and GitHub Actions link for `final-project` are recorded once the
-branch is pushed; that step is tracked separately and not claimed here in
-advance.
+`final-project` was pushed to `origin` (commit `044b639`) and its GitHub
+Actions run passed (see CI evidence above).
