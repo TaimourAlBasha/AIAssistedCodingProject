@@ -21,6 +21,37 @@ Current task features include:
 The backend serves the frontend directly. API documentation is available at
 <http://127.0.0.1:8000/docs>.
 
+## Final Project
+
+The submission branch is `final-project`. This release focuses on verification,
+documentation, AI-review triage, governance, CI, and container safety; it does
+not add a new product feature.
+
+Run the application locally:
+
+```powershell
+uvicorn app.main:app --reload --port 8000
+```
+
+Run the complete test suite:
+
+```powershell
+pytest -v
+```
+
+Build and run the container:
+
+```powershell
+docker build -t task-tracker:dev .
+docker run --detach --name tt-dev --publish 8000:8000 task-tracker:dev
+```
+
+Final verification is recorded in
+[`docs/release-evidence.md`](docs/release-evidence.md). AI review, security
+triage, corrections, and ownership are recorded in
+[`docs/final-ai-review.md`](docs/final-ai-review.md). Personal AI-use rules are
+recorded in [`docs/ai-playbook.md`](docs/ai-playbook.md).
+
 ## Prerequisites
 
 - Python 3.11
@@ -41,6 +72,11 @@ python -m pip install -r requirements.txt
 ```
 
 Dependencies are currently unpinned in `requirements.txt`.
+
+No environment variable is required to run the current application. The
+repository's `.env.example` contains illustrative `PORT` and `APP_ENV` values,
+but application startup currently uses the explicit command-line port and does
+not read either setting.
 
 ## Run the app locally
 
@@ -117,6 +153,11 @@ docker rm --force tt-dev
 
 Docker build and runtime verification have passed with the commands above.
 
+If port 8000 is already in use, stop the existing local server or container
+before starting another one. If `pytest` is missing, activate the repository
+virtual environment and reinstall `requirements.txt`. If Docker commands cannot
+connect, start Docker Desktop and wait for the Linux engine to become ready.
+
 ## CI workflow summary
 
 The workflow at `.github/workflows/ci.yml` runs on every push and pull request.
@@ -147,11 +188,14 @@ task-tracker-api/
 │   └── midcourse/
 ├── frontend/
 │   └── index.html
+├── scripts/
+│   └── seed_tasks.py
 ├── tests/
 │   ├── test_models.py
 │   ├── test_storage.py
 │   └── test_tasks.py
 ├── .dockerignore
+├── add_tasks.py
 ├── CLAUDE.md
 ├── Dockerfile
 ├── README.md
@@ -167,6 +211,19 @@ task-tracker-api/
 - `docs/decisions/` contains technical decision notes.
 - `docs/module4/` contains Module 4 verification evidence.
 - `docs/midcourse/` contains project decisions and learning evidence.
+
+### Development utility scripts
+
+Two optional scripts seed sample tasks for manual/local testing; neither runs
+as part of the application, tests, or CI:
+
+- `scripts/seed_tasks.py` seeds tasks directly into in-memory storage via
+  `app.storage`. Run it with `python -m scripts.seed_tasks` after activating
+  the virtual environment; no extra dependency is required.
+- `add_tasks.py` seeds the same sample tasks over HTTP against a running
+  server (`python add_tasks.py` while `uvicorn` is running on port 8000). It
+  requires the `requests` package, which is **not** in `requirements.txt` and
+  must be installed separately (`pip install requests`) to use this script.
 
 ## Project conventions and current limitations
 
@@ -191,6 +248,10 @@ Current limitations:
 - Dependency versions are not pinned.
 - CORS is configured only for `localhost:5500` and `127.0.0.1:5500`.
 - The frontend is a single vanilla JavaScript HTML file.
+- The sample `.env.example` values are not application configuration inputs at
+  present.
+- The Docker image installs the single requirements file, so it also contains
+  the current test dependencies.
 
 ## Technical decisions
 

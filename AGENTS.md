@@ -53,14 +53,15 @@ pytest -v
 - Due dates and assignees are optional.
 - Overdue tasks have a past due date and are not in the `Done` state.
 
-## Module 5 guardrails
+## Final-project guardrails
 
-- Module 5 is for grading, governance, planning, and documentation - not new app
-  feature implementation.
+- The final project hardens, verifies, documents, reviews, and governs the
+  existing Task Tracker. It does not add product features.
 - Prefer read-only inspection before proposing changes.
-- Keep Module 5 outputs under `docs/`.
-- Do not modify `app/` unless the user explicitly approves one specific,
-  minimal change.
+- Do not add comments, authentication, a database, notifications, deployment,
+  or major UI changes.
+- Modify `app/` or `frontend/` only for a specific, minimal correction approved
+  by the user, and explain that correction in `docs/final-ai-review.md`.
 - Work on one bounded task per thread.
 - Cite actual files and line numbers when making repository claims.
 - Mark uncertainty clearly instead of guessing.
@@ -80,6 +81,37 @@ pytest -v
 - Keep student judgments, manual findings, and personal AI rules attributable
   to the student; ask for evidence rather than fabricating them.
 
+Never commit:
+
+- `.env` files, credentials, tokens, passwords, or private keys
+- production logs, customer data, or personal account/session information
+- `venv/`, `.venv/`, caches, build output, editor files, or OS metadata
+- assignment PDFs, temporary exports, or AI planning files with unfinished
+  placeholders
+
+## Coding and testing expectations
+
+- Keep validation in `app/models.py`, transition rules in
+  `app/business_rules.py`, storage behavior in `app/storage.py`, and routes in
+  `app/main.py`.
+- Preserve public route and model names unless a requested change requires a
+  documented contract update.
+- Add or update focused tests for changed behavior, then run the complete suite
+  with `pytest -v`.
+- Supplement automated checks with a browser check for user-visible behavior.
+- For Docker changes, verify the build, `/health`, and non-root runtime user.
+
+## Documentation expectations
+
+- Keep commands copy-pasteable from the repository root.
+- Update README when startup, testing, Docker, CI, structure, or limitations
+  change.
+- Record final verification in `docs/release-evidence.md`, AI review and
+  security triage in `docs/final-ai-review.md`, and personal working rules in
+  `docs/ai-playbook.md`.
+- Separate automated evidence from human observations and never claim a check
+  that was not performed.
+
 ## Change discipline
 
 - Preserve existing behavior outside the explicitly approved scope.
@@ -88,3 +120,11 @@ pytest -v
 - Run only verification appropriate to the change.
 - Report warnings and unverified manual checks honestly.
 - Do not commit or push unless the user explicitly requests it.
+
+## Definition of done
+
+A final-project change is done only when its scope is clear, the diff contains
+no unrelated files, relevant focused checks and `pytest -v` pass, documented
+commands match the repository, privacy and placeholder scans are clean, and
+any required browser or Docker evidence is recorded. Before submission, confirm
+that the `final-project` branch is pushed and its GitHub Actions run is green.

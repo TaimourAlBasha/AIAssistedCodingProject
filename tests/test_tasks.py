@@ -1,5 +1,6 @@
+from datetime import date, datetime, timedelta
+
 import pytest
-from datetime import date, timedelta
 from fastapi.testclient import TestClient
 
 from app import storage
@@ -19,6 +20,41 @@ def test_get_version_returns_application_version(client):
 
     assert response.status_code == 200
     assert response.json() == {"version": "0.1.0"}
+
+
+def test_health_returns_ok_with_timezone_aware_timestamp(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert datetime.fromisoformat(payload["timestamp"]).tzinfo is not None
+
+
+@pytest.mark.parametrize(
+    ("current_status", "next_status"),
+    [
+        ("ToDo", "InProgress"),
+        ("InProgress", "Done"),
+        ("Done", "InProgress"),
+    ],
+)
+def test_patch_accepts_each_supported_status_transition(
+    client, current_status, next_status
+):
+    created = client.post(
+        "/tasks",
+        json={"title": "Workflow task", "status": current_status},
+    )
+    assert created.status_code == 201
+
+    response = client.patch(
+        f"/tasks/{created.json()['id']}",
+        json={"status": next_status},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["status"] == next_status
 
 
 def test_patch_in_progress_task_back_to_todo_rejects_unsupported_transition(client):
