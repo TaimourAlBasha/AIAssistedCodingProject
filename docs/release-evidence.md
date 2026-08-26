@@ -139,5 +139,10 @@ Performed on 2026-08-26 after the diff above was complete:
   `docs/ai-playbook.md`, `tests/test_tasks.py`, and the two new files in
   `docs/`. `app/` and `frontend/` are unchanged.
 
-`final-project` was pushed to `origin` (commit `044b639`) and its GitHub
-Actions run passed (see CI evidence above).
+`final-project` was pushed to `origin` and its GitHub Actions run passed (see
+CI evidence above). The repository's `main` branch previously pointed at an
+unrelated commit containing a mistakenly committed `venv/` (860 files) and a
+broken, unregistered submodule reference for this project instead of its
+history. `main` was updated to point at the same commit as `final-project`
+(`0013728`) so the default branch reflects the real, current application
+instead of that stray content.
