@@ -18,7 +18,7 @@ def test_get_version_returns_application_version(client):
     response = client.get("/version")
 
     assert response.status_code == 200
-    assert response.json() == {"version": "0.1.0"}
+    assert response.json() == {"version": "9.9.9"}
 
 
 def test_patch_in_progress_task_back_to_todo_rejects_unsupported_transition(client):
