@@ -44,6 +44,11 @@ def health_check() -> dict[str, str]:
     }
 
 
+@app.get("/version")
+def get_version() -> dict[str, str]:
+    return {"version": app.version}
+
+
 @app.post(
     "/tasks",
     response_model=TaskResponse,
