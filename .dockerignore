@@ -1,0 +1,42 @@
+# Secrets and local configuration
+.env
+.env.*
+
+# Git and GitHub metadata
+.git/
+.gitignore
+.github/
+
+# Python environments and caches
+venv/
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+**/*.py[cod]
+.pytest_cache/
+
+# Test and coverage output
+.coverage
+.coverage.*
+htmlcov/
+
+# JavaScript dependencies
+node_modules/
+**/node_modules/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+**/*.egg-info/
+
+# Local editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating-system files
+.DS_Store
+Thumbs.db

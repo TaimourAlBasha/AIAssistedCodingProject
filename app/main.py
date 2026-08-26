@@ -16,7 +16,7 @@ FRONTEND_FILE = Path(__file__).resolve().parent.parent / "frontend" / "index.htm
 
 app = FastAPI(
     title="Task Tracker API",
-    description="Module 1 learning project API for a simple shared task tracker.",
+    description="Module 4 learning project API for a simple shared task tracker.",
     version="0.1.0",
 )
 
@@ -34,10 +34,27 @@ app.add_middleware(
 
 @app.get("/", include_in_schema=False)
 def task_board() -> FileResponse:
+    """Serve the Task Tracker frontend.
+
+    Returns:
+        FileResponse: The response containing ``frontend/index.html``.
+
+    Example:
+        Request ``GET /``.
+    """
     return FileResponse(FRONTEND_FILE)
 
 @app.get("/health")
 def health_check() -> dict[str, str]:
+    """Report that the API process is running.
+
+    Returns:
+        dict[str, str]: A status value and the current UTC timestamp in ISO
+        format.
+
+    Example:
+        Request ``GET /health``.
+    """
     return {
         "status": "ok",
         "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -46,6 +63,14 @@ def health_check() -> dict[str, str]:
 
 @app.get("/version")
 def get_version() -> dict[str, str]:
+    """Return the FastAPI application's configured version.
+
+    Returns:
+        dict[str, str]: A mapping containing ``app.version``.
+
+    Example:
+        Request ``GET /version``.
+    """
     return {"version": app.version}
 
 
@@ -56,6 +81,18 @@ def get_version() -> dict[str, str]:
     tags=["tasks"],
 )
 def create_task(payload: TaskCreate) -> TaskResponse:
+    """Create and store a task.
+
+    Args:
+        payload: The validated fields for the new task.
+
+    Returns:
+        TaskResponse: The stored task, including its generated identifier and
+        timestamps.
+
+    Example:
+        Send ``POST /tasks`` with ``{"title": "Write tests"}``.
+    """
     return storage.add_task(payload)
 
 
@@ -68,6 +105,21 @@ def list_tasks(
     overdue: bool | None = None,
     tag: str | None = None,
 ) -> list[TaskResponse]:
+    """List tasks, optionally filtering by overdue state and tag.
+
+    Args:
+        overdue: When provided, select tasks matching that overdue state.
+        tag: When provided, select tasks containing that tag.
+
+    Returns:
+        list[TaskResponse]: The tasks matching all supplied filters.
+
+    Raises:
+        HTTPException: If ``tag`` is present but blank after trimming.
+
+    Example:
+        Request ``GET /tasks?overdue=true&tag=backend``.
+    """
     if tag is not None and not tag.strip():
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -83,6 +135,20 @@ def list_tasks(
     tags=["tasks"],
 )
 def get_task(task_id: str) -> TaskResponse:
+    """Return one task by its identifier.
+
+    Args:
+        task_id: The task identifier to retrieve.
+
+    Returns:
+        TaskResponse: The matching task.
+
+    Raises:
+        HTTPException: If no task has the supplied identifier.
+
+    Example:
+        Request ``GET /tasks/{task_id}``.
+    """
     task = storage.get_task_by_id(task_id)
     if task is None:
         raise HTTPException(
@@ -99,6 +165,22 @@ def get_task(task_id: str) -> TaskResponse:
     tags=["tasks"],
 )
 def update_task_route(task_id: str, payload: TaskUpdate) -> TaskResponse:
+    """Apply a partial update to an existing task.
+
+    Args:
+        task_id: The identifier of the task to update.
+        payload: The validated fields included in the partial update.
+
+    Returns:
+        TaskResponse: The task after applying the supplied fields.
+
+    Raises:
+        HTTPException: If the task does not exist or a supplied status change
+            violates the configured transition rules.
+
+    Example:
+        Send ``PATCH /tasks/{task_id}`` with ``{"status": "InProgress"}``.
+    """
     if payload.status is not None:
         existing = storage.get_task_by_id(task_id)
         if existing is None:
@@ -125,6 +207,20 @@ def update_task_route(task_id: str, payload: TaskUpdate) -> TaskResponse:
     tags=["tasks"],
 )
 def delete_task_route(task_id: str) -> None:
+    """Delete a task by its identifier.
+
+    Args:
+        task_id: The identifier of the task to delete.
+
+    Returns:
+        None.
+
+    Raises:
+        HTTPException: If no task has the supplied identifier.
+
+    Example:
+        Request ``DELETE /tasks/{task_id}``.
+    """
     if not storage.delete_task(task_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

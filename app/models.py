@@ -10,6 +10,18 @@ MAX_TAG_LENGTH = 30
 
 
 def normalize_tags(value: Optional[list[str]]) -> list[str]:
+    """Normalize, validate, and case-insensitively deduplicate task tags.
+
+    Args:
+        value: Tags to normalize, or ``None`` for an empty tag list.
+
+    Returns:
+        list[str]: Trimmed unique tags in their original order and spelling.
+
+    Raises:
+        ValueError: If a tag is blank, exceeds ``MAX_TAG_LENGTH``, or the
+            normalized result exceeds ``MAX_TAGS``.
+    """
     normalized_tags: list[str] = []
     seen: set[str] = set()
 
@@ -57,6 +69,17 @@ class TaskCreate(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: str) -> str:
+        """Validate and trim a title supplied during task creation.
+
+        Args:
+            value: The title to validate.
+
+        Returns:
+            str: The title with surrounding whitespace removed.
+
+        Raises:
+            ValueError: If the title is blank or longer than 200 characters.
+        """
         value = value.strip()
         if not value:
             raise ValueError("title must not be blank")
@@ -67,6 +90,17 @@ class TaskCreate(BaseModel):
     @field_validator("tags")
     @classmethod
     def validate_tags(cls, value: list[str]) -> list[str]:
+        """Normalize tags supplied during task creation.
+
+        Args:
+            value: The tags to validate and normalize.
+
+        Returns:
+            list[str]: The normalized tags.
+
+        Raises:
+            ValueError: If ``normalize_tags`` rejects a tag or the tag count.
+        """
         return normalize_tags(value)
 
 
@@ -84,6 +118,18 @@ class TaskUpdate(BaseModel):
     @field_validator("title")
     @classmethod
     def validate_title(cls, value: Optional[str]) -> Optional[str]:
+        """Validate and trim a title supplied in a partial update.
+
+        Args:
+            value: The replacement title, or ``None``.
+
+        Returns:
+            Optional[str]: ``None`` unchanged, otherwise the trimmed title.
+
+        Raises:
+            ValueError: If a provided title is blank or longer than 200
+                characters.
+        """
         if value is None:
             return None
 
@@ -97,6 +143,17 @@ class TaskUpdate(BaseModel):
     @field_validator("tags")
     @classmethod
     def validate_tags(cls, value: Optional[list[str]]) -> list[str]:
+        """Normalize tags supplied in a partial update.
+
+        Args:
+            value: Replacement tags, or ``None`` for an empty tag list.
+
+        Returns:
+            list[str]: The normalized replacement tags.
+
+        Raises:
+            ValueError: If ``normalize_tags`` rejects a tag or the tag count.
+        """
         return normalize_tags(value)
 
 
