@@ -52,6 +52,24 @@ triage, corrections, and ownership are recorded in
 [`docs/final-ai-review.md`](docs/final-ai-review.md). Personal AI-use rules are
 recorded in [`docs/ai-playbook.md`](docs/ai-playbook.md).
 
+### AI assistance summary
+
+AI helped draft or review: CI workflow, Dockerfile, README and AGENTS.md
+updates, focused test coverage, the security mini-review, and this evidence
+set.
+
+I verified the work by: running the full `pytest -v` suite (32 passed),
+rebuilding and running the Docker image independently and checking `/health`
+and the non-root runtime user, reviewing the final diff file by file, scanning
+for placeholders and tracked secrets, and manually exercising the frontend
+board myself (create, drag-and-drop, tags/due date/assignee/priority, overdue
+filter, filters, valid and invalid transitions).
+
+One AI suggestion I rejected or corrected: an earlier AI pass deleted
+`add_tasks.py` and `scripts/seed_tasks.py` as leftover files without asking
+first. I rejected that, restored both scripts, and documented them here
+instead, since they are legitimate optional dev-seed utilities.
+
 ## Prerequisites
 
 - Python 3.11
