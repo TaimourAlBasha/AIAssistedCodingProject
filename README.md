@@ -164,6 +164,8 @@ task-tracker-api/
 - `app/storage.py` contains in-memory task operations and filters.
 - `frontend/index.html` contains the frontend HTML, CSS, and JavaScript.
 - `tests/` contains model, storage, and API tests.
+- `docs/decisions/` contains technical decision notes.
+- `docs/module4/` contains Module 4 verification evidence.
 - `docs/midcourse/` contains project decisions and learning evidence.
 
 ## Project conventions and current limitations
@@ -192,7 +194,16 @@ Current limitations:
 
 ## Technical decisions
 
-The current architecture note is the
-[`docs/midcourse/mini-adr.md`](docs/midcourse/mini-adr.md) mini-ADR. Additional
-project workflow evidence is available under
+Technical decisions are recorded in:
+
+- [`docs/decisions/dockerfile-design.md`](docs/decisions/dockerfile-design.md)
+  for the Module 4 container design.
+- [`docs/midcourse/mini-adr.md`](docs/midcourse/mini-adr.md) for the midcourse
+  feature decisions.
+
+Module 4 verification evidence is recorded in
+[`docs/module4/verification.md`](docs/module4/verification.md), and the
+three-tool reflection is recorded in
+[`docs/module4/reflection.md`](docs/module4/reflection.md). Additional midcourse
+workflow evidence is available under
 [`docs/midcourse/`](docs/midcourse/).
